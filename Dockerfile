@@ -1,24 +1,31 @@
 FROM python:3.10-slim
 
-# Create app directory
+# Set working directory
 WORKDIR /app
 
-# Install OpenCV + system dependencies
-RUN apt-get update && apt-get install -y \
+# Install system-level dependencies for OpenCV and YOLO
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends \
     libglib2.0-0 \
     libgl1-mesa-glx \
     libgthread-2.0-0 \
-    && rm -rf /var/lib/apt/lists/*
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    wget \
+    && apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy app files
+# Copy all app files
 COPY . .
 
-# Expose the port FastAPI will run on
+# Expose FastAPI port
 EXPOSE 10000
 
-# Run FastAPI using Uvicorn
+# Run FastAPI
 CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "10000"]
