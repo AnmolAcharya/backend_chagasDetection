@@ -1,11 +1,9 @@
-FROM python:3.10-slim
+FROM python:3.10-bullseye
 
-# Set working directory
 WORKDIR /app
 
-# Install system-level dependencies for OpenCV and YOLO
+# Step 1: Update + Install all necessary system packages
 RUN apt-get update && \
-    apt-get upgrade -y && \
     apt-get install -y --no-install-recommends \
     libglib2.0-0 \
     libgl1-mesa-glx \
@@ -17,15 +15,16 @@ RUN apt-get update && \
     && apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies
+# Step 2: Install Python dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy all app files
+# Step 3: Add source code
 COPY . .
 
-# Expose FastAPI port
+# Step 4: Expose port for Render to auto-detect
 EXPOSE 10000
 
-# Run FastAPI
+# Step 5: Run FastAPI server
 CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "10000"]
+
